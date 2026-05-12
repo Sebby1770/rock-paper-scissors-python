@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """A tiny command-line Rock, Paper, Scissors game."""
 
 from __future__ import annotations

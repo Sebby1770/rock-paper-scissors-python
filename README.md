@@ -11,6 +11,11 @@ python3 rock_paper_scissors.py
 You can enter `rock`, `paper`, `scissors`, their first letters, or `1`, `2`, `3`.
 Type `q`, `quit`, or `exit` to end the game.
 
+## Run With Python Launcher On macOS
+
+Open `Rock Paper Scissors.py` with Python Launcher. The launcher version keeps the
+window open after the game ends so you can read the final score.
+
 ## Test
 
 ```bash
