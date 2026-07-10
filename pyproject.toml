@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rock-paper-scissors"
+version = "2.0.0"
+description = "A polished CLI Rock Paper Scissors suite with RPSLS, AI opponents, and stats."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Rock Paper Scissors contributors" }]
+keywords = ["game", "rock-paper-scissors", "rpsls", "cli"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Games/Entertainment",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = []
+
+[project.scripts]
+rock-paper-scissors = "rps.cli:main"
+rps = "rps.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/sebastianforbes/rock-paper-scissors-python"
+Repository = "https://github.com/sebastianforbes/rock-paper-scissors-python"
+
+[tool.setuptools.packages.find]
+include = ["rps*"]
+
+[tool.setuptools]
+py-modules = ["rock_paper_scissors"]

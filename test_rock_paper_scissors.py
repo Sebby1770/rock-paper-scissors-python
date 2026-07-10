@@ -1,3 +1,7 @@
+"""Backward-compatible top-level tests (also discovered by ``python3 -m unittest``)."""
+
+from __future__ import annotations
+
 import unittest
 
 from rock_paper_scissors import decide_winner, normalize_choice, play_round

@@ -1,13 +1,7 @@
-#!/usr/bin/env python3
-"""Rock Paper Scissors — package entry point and backward-compatible API.
-
-Public re-exports keep ``from rock_paper_scissors import play_round, ...`` working.
-"""
+"""Rock Paper Scissors (and RPSLS) game suite."""
 
 from __future__ import annotations
 
-from rps import __version__
-from rps.cli import main
 from rps.game import (
     BEATS,
     BEATS_CLASSIC,
@@ -25,14 +19,12 @@ from rps.game import (
     play_round,
 )
 
-# Classic-only OPTIONS alias for older callers / tests.
-OPTIONS = OPTIONS_CLASSIC
+__version__ = "2.0.0"
 
 __all__ = [
     "BEATS",
     "BEATS_CLASSIC",
     "BEATS_RPSLS",
-    "OPTIONS",
     "OPTIONS_CLASSIC",
     "OPTIONS_RPSLS",
     "Choice",
@@ -41,13 +33,8 @@ __all__ = [
     "RoundResult",
     "Scoreboard",
     "decide_winner",
-    "main",
     "normalize_choice",
     "options_for_mode",
     "play_round",
     "__version__",
 ]
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())
