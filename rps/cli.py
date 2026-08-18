@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 
 from rps import __version__
-from rps.ai import AIStrategy, available_ais, create_ai
+from rps.ai import AIStrategy, available_ais, create_ai, run_tournament
 from rps.game import (
     ICONS,
     Choice,
@@ -21,6 +21,7 @@ from rps.game import (
 from rps.stats import (
     LifetimeStats,
     default_stats_path,
+    export_stats_csv,
     load_stats,
     reset_stats,
     save_stats,
@@ -128,6 +129,27 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         dest="stats_file",
         help="Override path for the stats JSON file.",
+    )
+    parser.add_argument(
+        "--tournament",
+        action="store_true",
+        help="Run a round-robin AI tournament and exit.",
+    )
+    parser.add_argument(
+        "--tournament-rounds",
+        type=int,
+        default=30,
+        metavar="N",
+        dest="tournament_rounds",
+        help="Rounds per tournament matchup (default: 30).",
+    )
+    parser.add_argument(
+        "--export-stats",
+        type=Path,
+        default=None,
+        dest="export_stats",
+        metavar="PATH",
+        help="Write lifetime stats to a CSV file and exit.",
     )
     parser.add_argument(
         "--version",
@@ -275,6 +297,29 @@ def main(argv: list[str] | None = None) -> int:
         stats = load_stats(path)
         print(stats.format_report())
         print(f"\n(stats file: {path})")
+        return 0
+
+    if args.export_stats is not None:
+        path = stats_path if stats_path is not None else default_stats_path()
+        written = export_stats_csv(load_stats(path), args.export_stats)
+        print(f"Stats exported: {written}")
+        return 0
+
+    if args.tournament:
+        if args.tournament_rounds < 1:
+            parser.error("--tournament-rounds must be a positive integer")
+        result = run_tournament(
+            rounds=args.tournament_rounds,
+            mode=args.mode,
+            seed=args.seed,
+        )
+        print(f"Tournament ({result['mode']}, {result['rounds']} rounds/match)")
+        print(f"{'AI':<16} {'W':>5} {'L':>5} {'T':>5} {'M':>5}")
+        for row in result["standings"]:
+            print(
+                f"{row['name']:<16} {row['wins']:>5} {row['losses']:>5} "
+                f"{row['ties']:>5} {row['matches']:>5}"
+            )
         return 0
 
     if args.best_of is not None and args.best_of < 1:

@@ -10,6 +10,7 @@ from pathlib import Path
 from rps.game import Scoreboard, play_round
 from rps.stats import (
     LifetimeStats,
+    export_stats_csv,
     load_stats,
     reset_stats,
     save_stats,
@@ -89,6 +90,17 @@ class StatsFileTests(unittest.TestCase):
             loaded = load_stats(path)
             self.assertEqual(loaded.wins, 0)
             self.assertEqual(loaded.losses, 0)
+
+    def test_export_stats_csv(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "stats.csv"
+            stats = LifetimeStats(wins=4, losses=1, ties=2, best_streak=3, games_played=2)
+            stats.move_counts = {"rock": 5, "paper": 1}
+            written = export_stats_csv(stats, path)
+            text = written.read_text(encoding="utf-8")
+            self.assertIn("wins,4", text)
+            self.assertIn("favorite_move,rock", text)
+            self.assertIn("move_paper,1", text)
 
 
 if __name__ == "__main__":

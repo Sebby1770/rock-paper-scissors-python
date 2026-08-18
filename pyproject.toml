@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "rock-paper-scissors"
-version = "2.0.0"
-description = "A polished CLI Rock Paper Scissors suite with RPSLS, AI opponents, and stats."
+version = "2.1.0"
+description = "A polished CLI Rock Paper Scissors suite with RPSLS, AI opponents, tournaments, and stats."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }

@@ -21,6 +21,9 @@ class ParserTests(unittest.TestCase):
         self.assertIsNone(args.best_of)
         self.assertIsNone(args.seed)
         self.assertFalse(args.no_color)
+        self.assertFalse(args.tournament)
+        self.assertEqual(args.tournament_rounds, 30)
+        self.assertIsNone(args.export_stats)
 
     def test_flags(self):
         parser = build_parser()
@@ -68,6 +71,29 @@ class MainEntryTests(unittest.TestCase):
                 code = main(["--reset-stats", "--stats-file", str(path)])
             self.assertEqual(code, 0)
             self.assertEqual(load_stats(path).wins, 0)
+
+    def test_export_stats_flag(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            stats_path = Path(tmp) / "s.json"
+            csv_path = Path(tmp) / "s.csv"
+            save_stats(LifetimeStats(wins=6, losses=2), stats_path)
+            buf = io.StringIO()
+            with patch("sys.stdout", buf):
+                code = main(
+                    ["--export-stats", str(csv_path), "--stats-file", str(stats_path)]
+                )
+            self.assertEqual(code, 0)
+            self.assertTrue(csv_path.exists())
+            self.assertIn("wins,6", csv_path.read_text(encoding="utf-8"))
+
+    def test_tournament_flag(self):
+        buf = io.StringIO()
+        with patch("sys.stdout", buf):
+            code = main(["--tournament", "--tournament-rounds", "4", "--seed", "1"])
+        self.assertEqual(code, 0)
+        output = buf.getvalue()
+        self.assertIn("Tournament", output)
+        self.assertIn("pattern-break", output)
 
     def test_run_game_best_of_and_quit(self):
         with tempfile.TemporaryDirectory() as tmp:

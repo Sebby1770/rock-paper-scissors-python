@@ -10,9 +10,12 @@ from rps.ai import (
     BiasedAI,
     CounterAI,
     MarkovAI,
+    PatternBreakAI,
     RandomAI,
     available_ais,
     create_ai,
+    play_ai_match,
+    run_tournament,
 )
 
 
@@ -23,6 +26,7 @@ class FactoryTests(unittest.TestCase):
         self.assertIn("biased", names)
         self.assertIn("counter", names)
         self.assertIn("markov", names)
+        self.assertIn("pattern-break", names)
 
     def test_create_ai_unknown(self):
         with self.assertRaises(ValueError):
@@ -120,6 +124,47 @@ class MarkovAITests(unittest.TestCase):
         a = MarkovAI(rng=random.Random(7))
         b = MarkovAI(rng=random.Random(7))
         self.assertEqual(a.choose(), b.choose())
+
+
+class PatternBreakAITests(unittest.TestCase):
+    def test_counters_repeated_player_move(self):
+        ai = PatternBreakAI(mode="classic", rng=random.Random(0))
+        ai.observe("rock", "scissors")
+        ai.observe("rock", "scissors")
+        self.assertEqual(ai.choose(), "paper")
+
+    def test_avoids_obvious_counter_after_a_switch(self):
+        ai = PatternBreakAI(mode="classic", rng=random.Random(1))
+        ai.observe("rock", "scissors")
+        ai.observe("paper", "rock")
+        self.assertNotEqual(ai.choose(), "scissors")
+
+    def test_seeded_cold_start_is_reproducible(self):
+        a = PatternBreakAI(rng=random.Random(11))
+        b = PatternBreakAI(rng=random.Random(11))
+        self.assertEqual(a.choose(), b.choose())
+
+
+class TournamentTests(unittest.TestCase):
+    def test_play_ai_match_counts_rounds(self):
+        first = RandomAI(rng=random.Random(1))
+        second = RandomAI(rng=random.Random(2))
+        result = play_ai_match(first, second, rounds=12)
+        self.assertEqual(result["rounds"], 12)
+        self.assertEqual(result["wins"] + result["losses"] + result["ties"], 12)
+
+    def test_run_tournament_ranks_every_pair(self):
+        result = run_tournament(
+            ("random", "biased", "pattern-break"),
+            rounds=8,
+            seed=3,
+        )
+        self.assertEqual(len(result["matches"]), 3)
+        self.assertEqual(len(result["standings"]), 3)
+        names = {row["name"] for row in result["standings"]}
+        self.assertEqual(names, {"random", "biased", "pattern-break"})
+        self.assertEqual(result["standings"][0]["matches"], 2)
+        self.assertGreaterEqual(result["standings"][0]["wins"], result["standings"][1]["wins"])
 
 
 if __name__ == "__main__":
