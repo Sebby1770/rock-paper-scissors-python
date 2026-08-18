@@ -54,6 +54,15 @@ class LifetimeStats:
         self.move_counts[key] = self.move_counts.get(key, 0) + 1
 
     @property
+    def win_rate(self) -> float | None:
+        """Return wins / (wins + losses), or None when no decided rounds exist."""
+
+        decided = self.wins + self.losses
+        if decided == 0:
+            return None
+        return self.wins / decided
+
+    @property
     def favorite_move(self) -> str | None:
         """Return the most-played player move, or None if no data."""
 
@@ -83,6 +92,7 @@ class LifetimeStats:
         """Return a multi-line human-readable stats report."""
 
         fav = self.favorite_move or "(none)"
+        rate = f"{self.win_rate * 100:.1f}%" if self.win_rate is not None else "(none)"
         lines = [
             "Lifetime stats",
             f"  Games played : {self.games_played}",
@@ -90,6 +100,7 @@ class LifetimeStats:
             f"  Wins         : {self.wins}",
             f"  Losses       : {self.losses}",
             f"  Ties         : {self.ties}",
+            f"  Win rate     : {rate}",
             f"  Best streak  : {self.best_streak}",
             f"  Favorite move: {fav}",
         ]
@@ -178,6 +189,10 @@ def export_stats_csv(stats: LifetimeStats, path: Path) -> Path:
         ("games_played", str(stats.games_played)),
         ("rounds_played", str(stats.rounds_played)),
         ("favorite_move", stats.favorite_move or ""),
+        (
+            "win_rate",
+            f"{stats.win_rate:.4f}" if stats.win_rate is not None else "",
+        ),
     ]
     for move in sorted(stats.move_counts):
         rows.append((f"move_{move}", str(stats.move_counts[move])))

@@ -43,11 +43,17 @@ class LifetimeStatsTests(unittest.TestCase):
     def test_favorite_none_when_empty(self):
         self.assertIsNone(LifetimeStats().favorite_move)
 
+    def test_win_rate_ignores_ties(self):
+        stats = LifetimeStats(wins=3, losses=1, ties=6)
+        self.assertEqual(stats.win_rate, 0.75)
+        self.assertIsNone(LifetimeStats().win_rate)
+
     def test_format_report_contains_headers(self):
         stats = LifetimeStats(wins=1, losses=2, ties=3, best_streak=4)
         report = stats.format_report()
         self.assertIn("Wins", report)
         self.assertIn("Best streak", report)
+        self.assertIn("Win rate", report)
 
 
 class StatsFileTests(unittest.TestCase):
