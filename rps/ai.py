@@ -147,12 +147,53 @@ class PatternBreakAI(AIStrategy):
         self._history.append(player_choice)
 
 
+class AdaptiveAI(AIStrategy):
+    """Switch strategy from the current match record.
+
+    Behind by two or more: pattern-break. Ahead by two or more: counter.
+    Otherwise markov.
+    """
+
+    name = "adaptive"
+
+    def __init__(self, mode: Mode = "classic", rng: random.Random | None = None) -> None:
+        super().__init__(mode=mode, rng=rng)
+        self._markov = MarkovAI(mode=mode, rng=rng)
+        self._counter = CounterAI(mode=mode, rng=rng)
+        self._pattern = PatternBreakAI(mode=mode, rng=rng)
+        self._wins = 0
+        self._losses = 0
+        self.active_strategy = "markov"
+
+    def choose(self) -> Choice:
+        margin = self._wins - self._losses
+        if margin <= -2:
+            self.active_strategy = "pattern-break"
+            return self._pattern.choose()
+        if margin >= 2:
+            self.active_strategy = "counter"
+            return self._counter.choose()
+        self.active_strategy = "markov"
+        return self._markov.choose()
+
+    def observe(self, player_choice: Choice, computer_choice: Choice) -> None:
+        player_outcome = decide_winner(player_choice, computer_choice, mode=self.mode)
+        if player_outcome == "lose":
+            self._wins += 1
+        elif player_outcome == "win":
+            self._losses += 1
+        self._markov.observe(player_choice, computer_choice)
+        self._counter.observe(player_choice, computer_choice)
+        self._pattern.observe(player_choice, computer_choice)
+
+
 _STRATEGIES: dict[str, Callable[..., AIStrategy]] = {
     "random": RandomAI,
     "biased": BiasedAI,
     "counter": CounterAI,
     "markov": MarkovAI,
     "pattern-break": PatternBreakAI,
+    "adaptive": AdaptiveAI,
 }
 
 

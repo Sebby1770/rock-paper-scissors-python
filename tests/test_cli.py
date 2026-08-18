@@ -24,6 +24,7 @@ class ParserTests(unittest.TestCase):
         self.assertFalse(args.tournament)
         self.assertEqual(args.tournament_rounds, 30)
         self.assertIsNone(args.export_stats)
+        self.assertIsNone(args.challenge)
 
     def test_flags(self):
         parser = build_parser()
@@ -94,6 +95,18 @@ class MainEntryTests(unittest.TestCase):
         output = buf.getvalue()
         self.assertIn("Tournament", output)
         self.assertIn("pattern-break", output)
+
+    def test_challenge_flag(self):
+        buf = io.StringIO()
+        with patch("sys.stdout", buf):
+            code = main(
+                ["--challenge", "adaptive", "--ai", "random", "--tournament-rounds", "6", "--seed", "2"]
+            )
+        self.assertEqual(code, 0)
+        output = buf.getvalue()
+        self.assertIn("Challenge", output)
+        self.assertIn("adaptive", output)
+        self.assertIn("random", output)
 
     def test_run_game_best_of_and_quit(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 
 from rps import __version__
-from rps.ai import AIStrategy, available_ais, create_ai, run_tournament
+from rps.ai import AIStrategy, available_ais, create_ai, play_ai_match, run_tournament
 from rps.game import (
     ICONS,
     Choice,
@@ -150,6 +150,12 @@ def build_parser() -> argparse.ArgumentParser:
         dest="export_stats",
         metavar="PATH",
         help="Write lifetime stats to a CSV file and exit.",
+    )
+    parser.add_argument(
+        "--challenge",
+        default=None,
+        metavar="AI",
+        help="Run a named AI against --ai and exit.",
     )
     parser.add_argument(
         "--version",
@@ -320,6 +326,26 @@ def main(argv: list[str] | None = None) -> int:
                 f"{row['name']:<16} {row['wins']:>5} {row['losses']:>5} "
                 f"{row['ties']:>5} {row['matches']:>5}"
             )
+        return 0
+
+    if args.challenge:
+        if args.tournament_rounds < 1:
+            parser.error("--tournament-rounds must be a positive integer")
+        rng = random.Random(args.seed)
+        try:
+            first = create_ai(args.challenge, mode=args.mode, rng=random.Random(rng.randint(0, 1_000_000_000)))
+            second = create_ai(args.ai, mode=args.mode, rng=random.Random(rng.randint(0, 1_000_000_000)))
+        except ValueError as exc:
+            parser.error(str(exc))
+        result = play_ai_match(first, second, args.tournament_rounds, mode=args.mode)
+        print(
+            f"Challenge: {result['first']} vs {result['second']} "
+            f"({result['rounds']} rounds, {args.mode})"
+        )
+        print(
+            f"{result['first']} {result['wins']}-{result['losses']}-{result['ties']} "
+            f"{result['second']}"
+        )
         return 0
 
     if args.best_of is not None and args.best_of < 1:

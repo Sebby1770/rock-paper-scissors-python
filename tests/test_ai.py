@@ -7,6 +7,7 @@ import unittest
 from collections import Counter
 
 from rps.ai import (
+    AdaptiveAI,
     BiasedAI,
     CounterAI,
     MarkovAI,
@@ -27,6 +28,7 @@ class FactoryTests(unittest.TestCase):
         self.assertIn("counter", names)
         self.assertIn("markov", names)
         self.assertIn("pattern-break", names)
+        self.assertIn("adaptive", names)
 
     def test_create_ai_unknown(self):
         with self.assertRaises(ValueError):
@@ -143,6 +145,27 @@ class PatternBreakAITests(unittest.TestCase):
         a = PatternBreakAI(rng=random.Random(11))
         b = PatternBreakAI(rng=random.Random(11))
         self.assertEqual(a.choose(), b.choose())
+
+
+class AdaptiveAITests(unittest.TestCase):
+    def test_starts_on_markov(self):
+        ai = AdaptiveAI(rng=random.Random(0))
+        ai.choose()
+        self.assertEqual(ai.active_strategy, "markov")
+
+    def test_switches_to_pattern_break_after_two_losses(self):
+        ai = AdaptiveAI(mode="classic", rng=random.Random(0))
+        ai.observe("rock", "scissors")
+        ai.observe("rock", "scissors")
+        ai.choose()
+        self.assertEqual(ai.active_strategy, "pattern-break")
+
+    def test_switches_to_counter_after_two_wins(self):
+        ai = AdaptiveAI(mode="classic", rng=random.Random(0))
+        ai.observe("scissors", "rock")
+        ai.observe("scissors", "rock")
+        ai.choose()
+        self.assertEqual(ai.active_strategy, "counter")
 
 
 class TournamentTests(unittest.TestCase):
