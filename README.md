@@ -2,16 +2,17 @@
 
 [![CI](https://github.com/sebastianforbes/rock-paper-scissors-python/actions/workflows/ci.yml/badge.svg)](https://github.com/sebastianforbes/rock-paper-scissors-python/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
-[![Version](https://img.shields.io/badge/version-2.0.0-brightgreen.svg)](./pyproject.toml)
+[![Version](https://img.shields.io/badge/version-2.1.0-brightgreen.svg)](./pyproject.toml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-lightgrey.svg)](./pyproject.toml)
 
 A polished command-line **Rock Paper Scissors** suite with:
 
 - Classic RPS **and** RPSLS (lizard / Spock)
-- Four AI opponents (random, biased, counter, markov)
+- Five AI opponents (random, biased, counter, markov, pattern-break)
 - Best-of-N match mode
+- AI vs AI tournament mode
 - Win-streak tracking and round history
-- Lifetime stats persisted to disk
+- Lifetime stats persisted to disk, with CSV export
 - Colored TTY output (no third-party deps)
 
 ## Quick start
@@ -42,7 +43,11 @@ python3 rock_paper_scissors.py --ai biased --no-color
 
 # Lifetime stats
 python3 rock_paper_scissors.py --stats
+python3 rock_paper_scissors.py --export-stats stats.csv
 python3 rock_paper_scissors.py --reset-stats
+
+# Round-robin AI tournament
+python3 rock_paper_scissors.py --tournament --tournament-rounds 40 --seed 7
 ```
 
 ### Input
@@ -61,7 +66,7 @@ python3 rock_paper_scissors.py --reset-stats
 | Flag | Description |
 |------|-------------|
 | `--mode classic\|rpsls` | Game ruleset (default: `classic`) |
-| `--ai random\|biased\|counter\|markov` | Opponent strategy (default: `random`) |
+| `--ai random\|biased\|counter\|markov\|pattern-break` | Opponent strategy (default: `random`) |
 | `--best-of N` | First to `N//2+1` wins |
 | `--seed INT` | Seed RNG for reproducible AI play |
 | `--no-color` | Disable ANSI colors |
@@ -69,6 +74,9 @@ python3 rock_paper_scissors.py --reset-stats
 | `--stats` | Print lifetime stats and exit |
 | `--reset-stats` | Clear lifetime stats and exit |
 | `--stats-file PATH` | Override stats JSON path |
+| `--tournament` | Run a round-robin AI tournament and exit |
+| `--tournament-rounds N` | Rounds per tournament matchup (default: 30) |
+| `--export-stats PATH` | Write lifetime stats to a CSV file and exit |
 | `--version` | Print version |
 
 Stats file resolution: `RPS_STATS_PATH` env → existing `./.rps_stats.json` → `~/.rps_stats.json`.
@@ -81,6 +89,7 @@ Stats file resolution: `RPS_STATS_PATH` env → existing `./.rps_stats.json` →
 | `biased` | Slightly prefers rock (~40%) |
 | `counter` | Counters your previous move |
 | `markov` | Predicts your next move from 1-step transitions, then counters |
+| `pattern-break` | Counters repeats; otherwise avoids the obvious counter to your last move |
 
 ## Library API
 

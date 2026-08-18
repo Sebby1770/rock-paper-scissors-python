@@ -164,3 +164,28 @@ def track_move(stats: LifetimeStats, choice: Choice | str) -> None:
 
     key = str(choice)
     stats.move_counts[key] = stats.move_counts.get(key, 0) + 1
+
+
+def export_stats_csv(stats: LifetimeStats, path: Path) -> Path:
+    """Write a one-table CSV summary of lifetime stats and return the path."""
+
+    rows = [
+        ("metric", "value"),
+        ("wins", str(stats.wins)),
+        ("losses", str(stats.losses)),
+        ("ties", str(stats.ties)),
+        ("best_streak", str(stats.best_streak)),
+        ("games_played", str(stats.games_played)),
+        ("rounds_played", str(stats.rounds_played)),
+        ("favorite_move", stats.favorite_move or ""),
+    ]
+    for move in sorted(stats.move_counts):
+        rows.append((f"move_{move}", str(stats.move_counts[move])))
+
+    target = Path(path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(
+        "".join(f"{metric},{value}\n" for metric, value in rows),
+        encoding="utf-8",
+    )
+    return target
